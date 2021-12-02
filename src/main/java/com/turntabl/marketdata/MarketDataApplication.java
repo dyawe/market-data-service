@@ -24,8 +24,8 @@ public class MarketDataApplication {
 //            e.printStackTrace();
 //        }
 
-//        System.getenv().forEach((x , b)-> System.out.println(x + "=========="+ b));
-        System.getProperties().forEach((c,v) -> System.out.println(c + "======" + v));
+        System.getenv().forEach((x , b)-> System.out.println(x + "=========="+ b));
+//        System.getProperties().forEach((c,v) -> System.out.println(c + "======" + v));
         var host = System.getenv("TEST");
 //        int port= Integer.parseInt(System.getenv("REDIS_PORT"));
         String password = System.getenv("REDIS_PASSWORD");

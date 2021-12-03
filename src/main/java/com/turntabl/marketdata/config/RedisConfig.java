@@ -18,6 +18,8 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 
+import java.util.List;
+
 @Configuration
 @Slf4j
 public class RedisConfig {
@@ -25,15 +27,16 @@ public class RedisConfig {
     private  String topic;
     @Value("${market-data.variables.redis.topic-ex2}")
     private  String topic2;
-
+    @Value("${spring.redis.port}")
+    private int port;
+    @Value("${spring.redis.host}")
+    private String host;
+    @Value("${spring.redis.password}")
+    private String password;
 
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
-        var host = System.getenv("REDIS_HOST");
-//        int port= Integer.parseInt(System.getenv("REDIS_PORT"));
-        String password = System.getenv("REDIS_PASSWORD");
-        log.info("Rei details {}", host);
-        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration("localhost", 6379);
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(host, port);
 //        redisStandaloneConfiguration.setPassword(RedisPassword.of(password));
         return new JedisConnectionFactory(redisStandaloneConfiguration);
     }
@@ -47,29 +50,22 @@ public class RedisConfig {
     }
 
     @Bean
-    @Qualifier("messageListener")
     MessageListenerAdapter messageListener() {
-        return new MessageListenerAdapter(new RedisMessageSubscriber());
+        return new MessageListenerAdapter( new RedisMessageSubscriber(), "onMessage");
     }
 
-//    @Bean
-//    @Qualifier("channelTwoListenerAdapter")
-//    MessageListenerAdapter channelTwoListenerAdapter() {
-//        return new MessageListenerAdapter(new ChannelTwoMessageSubscriber());
-//    }
 
     @Bean
     RedisMessageListenerContainer redisContainer( ) {
         final RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(jedisConnectionFactory());
-        container.addMessageListener(messageListener(), topic());
-//        container.addMessageListener(channelTwoListenerAdapter(), topicForExchange2());
+        container.addMessageListener(messageListener(), List.of(topic()));
         return container;
     }
 
     @Bean
     MessagePublisher redisPublisher() {
-        return new RedisMessagePublisher(redisTemplate(), topic());
+        return new RedisMessagePublisher(redisTemplate(), topic(), topicForExchange2());
     }
 
     @Bean

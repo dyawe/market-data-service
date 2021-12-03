@@ -33,8 +33,6 @@ public class MarketDataServiceImpl implements MarketDataService {
 
     @Override
     public List<OrderBookDto> getOrderBooks() {
-//        return restTemplate
-//                .getForEntity(exchange1Url, List<OrderBookDto>.class).getBody();
         return restTemplate.exchange(exchange1Url, HttpMethod.GET, null,
                 new ParameterizedTypeReference<List<OrderBookDto>>(){}).getBody();
 
@@ -50,14 +48,19 @@ public class MarketDataServiceImpl implements MarketDataService {
     public void subscribe() throws AlreadySubscribedException {
 
         if(getSubscriptions().contains(callback)) {
+            log.info("======>Exception thrown. You have already subscribed with this endpoint<=========================");
             throw new AlreadySubscribedException(callback);
         }
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-Type", "application/json");
         HttpEntity<?> httpEntity = new HttpEntity<>(callback, httpHeaders);
         HttpEntity<?> httpEntityEx2 = new HttpEntity<>(exchange2Callback, httpHeaders);
+
         restTemplate.exchange(exchange1Url + "/subscription", HttpMethod.POST, httpEntity, String.class);
+        log.info("======>Successfully subscribed to exchange one. Waiting for market data======>");
         restTemplate.exchange(exchange2Url + "/subscription", HttpMethod.POST, httpEntityEx2, String.class);
+        log.info("======>Successfully subscribed to exchange two. Waiting for market data======>");
+
     }
 
     @Override

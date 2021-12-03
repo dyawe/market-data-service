@@ -17,9 +17,17 @@ public class OrderBookDto {
     @JsonProperty("MAX_PRICE_SHIFT")
     private float maxPriceShift;
 
+    /**
+     * @apiNote Highest Price(eg 30GHS) at which a Buyer will Buy the stock i.e
+     *  Either i buy at 30GHS Last or lower. Not enough to buy above 30
+     */
     @JsonProperty("BID_PRICE")
     private float bidPrice;
 
+    /**
+     * @apiNote Lowest Price (eg 50GHS) at which a seller will sell the stock. i.e
+     * either I sell at 50GHS or Higher. Not Lower ever
+     */
     @JsonProperty("ASK_PRICE")
     private float askPrice;
 

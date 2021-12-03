@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.turntabl.marketdata.dto.ErrorMessage;
 import com.turntabl.marketdata.dto.OrderBookDto;
+import com.turntabl.marketdata.enums.Exchange;
 import com.turntabl.marketdata.exceptions.AlreadySubscribedException;
 import com.turntabl.marketdata.exceptions.EntityNotFoundException;
+import com.turntabl.marketdata.service.MarketDataHandlingService;
 import com.turntabl.marketdata.service.MarketDataService;
 import com.turntabl.marketdata.service.impl.RedisMessagePublisher;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,18 +30,41 @@ public class MarketDataResource {
     @Value("${market-data.variables.redis.topic}")
     private  String topic;
     private final MarketDataService marketDataService;
+    private final MarketDataHandlingService marketDataHandlingService;
     private final RedisMessagePublisher redisMessagePublisher;
+
 
     @PostMapping("/market-data")
     ResponseEntity<Object> getMarketData(@RequestBody ArrayList<OrderBookDto> orderBooks){
         log.info("order books: {}" ,orderBooks);
+        Exchange.ONE.name();
         return ResponseEntity.ok("success!!");
     }
-    @PostMapping("/callback/webhook")
-    ResponseEntity<Object> onMarketDataSubscribe(@RequestBody ArrayList<OrderBookDto> orderBooks){
-        log.info("order books: {}" ,orderBooks);
+    /**
+     * @apiNote Receives a list of orderbooks from exchange one and transforms it before publishing
+     * @param orderBooks  A list of orderbooks broadcasted from exchange one
+     * @return Success message
+     */
+    @PostMapping("/callback/webhook" )
+    ResponseEntity<Object> onMarketDataSubscribe(@RequestBody List<OrderBookDto> orderBooks){
+        log.info("Order books coming from exchange one ===>{}" ,orderBooks);
+//        redisMessagePublisher.publish(orderBooks);
         return ResponseEntity.ok("success!!");
     }
+    /**
+     * @apiNote Receives a list of orderbooks from exchange TWO and transforms it before publishing
+     * @param orderBooks  A list of orderbooks broadcasted from exchange one
+     * @return Success message
+     */
+    @PostMapping("/callback2/webhook")
+    public void onSecondMarketDataSubscribe(@RequestBody ArrayList<OrderBookDto> orderBooks) {
+        marketDataHandlingService.receiveOrderBooks(orderBooks, Exchange.TWO);
+        log.info("Order books coming from exchange two ===>{}" ,orderBooks);
+    }
+    /**
+     *
+     * @param body
+     */
     @PostMapping("/test")
     public void test(@RequestBody String body) {
         marketDataService.mutateSubscription();
@@ -62,38 +86,38 @@ public class MarketDataResource {
         
         try {
             arrayToJson = objectMapper.writeValueAsString(List.of(orderBookDto, orderBookDto2));
-            redisMessagePublisher.publish(arrayToJson);
+//            redisMessagePublisher.publish(List.of(orderBookDto, orderBookDto2));
         } catch (JsonProcessingException ex) {
             System.out.println("Error processing data");
         }
 
     }
 
-    @PostMapping("/callback2/webhook")
-    public void onSecondMarketDataSubscribe(@RequestBody String body) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-        OrderBookDto orderBookDto = new OrderBookDto();
-        OrderBookDto orderBookDto2 = new OrderBookDto();
-        orderBookDto.setAskPrice(10f);
-        orderBookDto2.setAskPrice(102f);
-        orderBookDto.setBidPrice(400f);
-        orderBookDto2.setBidPrice(903f);
-        orderBookDto.setTicker("mxn");
-        orderBookDto2.setTicker("dluffy");
-        orderBookDto.setBuyLimit(9875);
-        orderBookDto.setBuyLimit(10000);
-        String arrayToJson = null;
-
-        try {
-            arrayToJson = objectMapper.writeValueAsString(List.of(orderBookDto, orderBookDto2));
-            redisMessagePublisher.publish2(arrayToJson);
-        } catch (JsonProcessingException ex) {
-            System.out.println("Error processing data");
-        }
-
-    }
+//    @PostMapping("/callback2/webhook")
+//    public void onSecondMarketDataSubscribe(@RequestBody String body) {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+//
+//        OrderBookDto orderBookDto = new OrderBookDto();
+//        OrderBookDto orderBookDto2 = new OrderBookDto();
+//        orderBookDto.setAskPrice(10f);
+//        orderBookDto2.setAskPrice(102f);
+//        orderBookDto.setBidPrice(400f);
+//        orderBookDto2.setBidPrice(903f);
+//        orderBookDto.setTicker("mxn");
+//        orderBookDto2.setTicker("dluffy");
+//        orderBookDto.setBuyLimit(9875);
+//        orderBookDto.setBuyLimit(10000);
+//        String arrayToJson = null;
+//
+//        try {
+//            arrayToJson = objectMapper.writeValueAsString(List.of(orderBookDto, orderBookDto2));
+//            redisMessagePublisher.publish2(arrayToJson);
+//        } catch (JsonProcessingException ex) {
+//            System.out.println("Error processing data");
+//        }
+//
+//    }
 
 
     @GetMapping("/md")

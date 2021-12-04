@@ -34,5 +34,13 @@ public class OrderBookDto {
     @JsonProperty("LAST_TRADED_PRICE")
     private float lastTradedPrice;
 
+    public OrderBookDto() {
+    }
 
+    public OrderBookDto(String ticker, int sellLimit, int buyLimit, float maxPriceShift) {
+        this.ticker = ticker;
+        this.sellLimit = sellLimit;
+        this.buyLimit = buyLimit;
+        this.maxPriceShift = maxPriceShift;
+    }
 }

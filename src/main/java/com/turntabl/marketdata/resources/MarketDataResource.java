@@ -46,7 +46,7 @@ public class MarketDataResource {
      * @return Success message
      */
     @PostMapping("/callback/webhook" )
-    ResponseEntity<Object> onMarketDataSubscribe(@RequestBody List<OrderBookDto> orderBooks){
+    ResponseEntity<?> onMarketDataSubscribe(@RequestBody List<OrderBookDto> orderBooks){
         log.info("Order books coming from exchange one ===>{}" ,orderBooks);
 //        redisMessagePublisher.publish(orderBooks);
         return ResponseEntity.ok("success!!");
@@ -57,14 +57,23 @@ public class MarketDataResource {
      * @return Success message
      */
     @PostMapping("/callback2/webhook")
-    public void onSecondMarketDataSubscribe(@RequestBody ArrayList<OrderBookDto> orderBooks) {
+    ResponseEntity<?>  onSecondMarketDataSubscribe(@RequestBody ArrayList<OrderBookDto> orderBooks) {
         marketDataHandlingService.receiveOrderBooks(orderBooks, Exchange.TWO);
         log.info("Order books coming from exchange two ===>{}" ,orderBooks);
+        return ResponseEntity.ok("success!!");
     }
     /**
      *
-     * @param body
+     * @param
      */
+
+    @GetMapping("/mockito")
+    public ResponseEntity<Object> mockCallbackEndpoint(){
+        return ResponseEntity.ok("success");
+    }
+
+
+
     @PostMapping("/test")
     public void test(@RequestBody String body) {
         marketDataService.mutateSubscription();

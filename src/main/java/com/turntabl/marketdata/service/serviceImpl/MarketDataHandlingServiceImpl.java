@@ -7,6 +7,7 @@ import com.turntabl.marketdata.enums.Side;
 import com.turntabl.marketdata.service.MarketDataHandlingService;
 import com.turntabl.marketdata.service.impl.RedisMessagePublisher;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -18,7 +19,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class MarketDataHandlingServiceImpl implements MarketDataHandlingService {
-    private final RedisMessagePublisher redisMessagePublisher;
+    @Autowired
+    RedisMessagePublisher redisMessagePublisher;
 
     @Override
     public Map<Side, Map<String, List<OrderBookDto>>> transformData(List<OrderBookDto> orderBooks) {

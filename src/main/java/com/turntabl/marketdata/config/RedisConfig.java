@@ -63,10 +63,10 @@ public class RedisConfig {
         return container;
     }
 
-    @Bean
-    MessagePublisher redisPublisher() {
-        return new RedisMessagePublisher(redisTemplate(), topic(), topicForExchange2());
-    }
+//    @Bean
+//    MessagePublisher redisPublisher() {
+//        return new RedisMessagePublisher(redisTemplate(), topic(), topicForExchange2());
+//    }
 
     @Bean
     ChannelTopic topic() {

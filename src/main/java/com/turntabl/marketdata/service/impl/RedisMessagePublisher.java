@@ -20,26 +20,31 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
 public class RedisMessagePublisher implements MessagePublisher {
-    private final   RedisTemplate<String, Object> redisTemplate;
-    private final ChannelTopic topic;
-    private final ChannelTopic topicForExchange2;
+
+    @Autowired
+    RedisTemplate redisTemplate;
+
+    @Autowired
+    ChannelTopic topic;
+
+    @Autowired
+    ChannelTopic topicForExchange2;
 
     @Override
     public void publish(OrderFromExchange message) {
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        String arrayToJson = null;
+        String messageString = null;
         try {
             log.info("===> Serializing list of order books from exchange one ===>");
-            arrayToJson = objectMapper.writeValueAsString(message);
-            redisTemplate.convertAndSend(topic.getTopic(), arrayToJson);
+            messageString = objectMapper.writeValueAsString(message);
+            redisTemplate.convertAndSend(topic.getTopic(), messageString);
             log.info("===> Exchange one publishing order books on channel: {}===>", topic.getTopic());
         } catch (JsonProcessingException ex) {
-            log.info("JsonProcessingException occured while serializing order books from exchange one: channel {} ==>", topic.getTopic());
+            log.info("JsonProcessingException occurred while serializing order books from exchange one: channel {} ==>", topic.getTopic());
         }
 
     }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.turntabl.marketdata.dto.OrderBookDto;
 import com.turntabl.marketdata.dto.OrderFromExchange;
+import com.turntabl.marketdata.enums.Exchange;
 import com.turntabl.marketdata.enums.Side;
 import com.turntabl.marketdata.service.MessagePublisher;
 import lombok.AllArgsConstructor;
@@ -36,7 +37,7 @@ public class RedisMessagePublisher implements MessagePublisher {
         try {
             log.info("===> Serializing list of order books from exchange one ===>");
             arrayToJson = objectMapper.writeValueAsString(message);
-            redisTemplate.convertAndSend(topic.getTopic(), arrayToJson);
+//            redisTemplate.convertAndSend(topic.getTopic(), arrayToJson);
             log.info("===> Exchange one publishing order books on channel: {}===>", topic.getTopic());
         } catch (JsonProcessingException ex) {
             log.info("JsonProcessingException occured while serializing order books from exchange one: channel {} ==>", topic.getTopic());
@@ -44,8 +45,17 @@ public class RedisMessagePublisher implements MessagePublisher {
 
     }
 
-    public void publish2(String message) {
+    public void publish2(Map<Exchange, Map<Side, Map<String, List<OrderBookDto>>>> message) {
         log.info("sending from topic two");
-        redisTemplate.convertAndSend(topicForExchange2.getTopic(), message);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        String arrayToJson = null;
+        try {
+            arrayToJson = objectMapper.writeValueAsString(message);
+        } catch (Exception x) {
+
+        }
+        log.info(arrayToJson);
+        redisTemplate.convertAndSend(topic.getTopic(), arrayToJson);
     }
 }

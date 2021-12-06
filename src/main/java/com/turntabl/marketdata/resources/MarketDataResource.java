@@ -48,12 +48,12 @@ public class MarketDataResource {
     @PostMapping("/callback/webhook" )
     ResponseEntity<Object> onMarketDataSubscribe(@RequestBody List<OrderBookDto> orderBooks){
         log.info("Order books coming from exchange one ===>{}" ,orderBooks);
-//        redisMessagePublisher.publish(orderBooks);
+        marketDataHandlingService.receiveOrderBooks(orderBooks, Exchange.ONE);
         return ResponseEntity.ok("success!!");
     }
     /**
-     * @apiNote Receives a list of orderbooks from exchange TWO and transforms it before publishing
-     * @param orderBooks  A list of orderbooks broadcasted from exchange one
+     * @apiNote Receives a list of order books from exchange TWO and transforms it before publishing
+     * @param orderBooks  A list of order books broadcasted from exchange one
      * @return Success message
      */
     @PostMapping("/callback2/webhook")

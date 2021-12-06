@@ -1,9 +1,12 @@
 package com.turntabl.marketdata.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.turntabl.marketdata.dto.OrderBookDto;
 import com.turntabl.marketdata.dto.OrderFromExchange;
+import com.turntabl.marketdata.dto.OrderProcessObject;
+import com.turntabl.marketdata.dto.TickerWithOrders;
 import com.turntabl.marketdata.enums.Exchange;
 import com.turntabl.marketdata.enums.Side;
 import org.junit.jupiter.api.Test;
@@ -28,7 +31,7 @@ class MarketDataServiceImplTest {
     RedisMessageSubscriber subscriber;
 
     @Test
-    public void redisPubSubTest(){
+    public void redisPubSubTest() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
 
@@ -45,13 +48,14 @@ class MarketDataServiceImplTest {
 
         List list = List.of(orderBookDto, orderBookDto2);
 
-        Map test = new HashMap();
-        test.put("tickerClassification", list);
-        Map<Side, Map<String, List<OrderBookDto>>> map = new HashMap();
-        map.put(Side.BUY, test);
-        OrderFromExchange exchange = OrderFromExchange.builder().exchange(Exchange.ONE).orders(map).build();
+        TickerWithOrders tickerOrder = TickerWithOrders.builder().orders(list).ticker("TICKER").build();
+        OrderProcessObject orderProcessObject = OrderProcessObject.builder().side(Side.BUY).tickerWithOrders(tickerOrder).build();
+        OrderFromExchange exchange = OrderFromExchange.builder().exchange(Exchange.ONE).orders(orderProcessObject).build();
         publisher.publish(exchange);
-        assertEquals(exchange,exchange);
+
+        String expected = objectMapper.writeValueAsString(exchange);
+        String actual = subscriber.getMessageString();
+        assertEquals(expected,actual);
 
     }
 

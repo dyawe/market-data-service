@@ -1,7 +1,10 @@
 package com.turntabl.marketdata.service.serviceImpl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turntabl.marketdata.dto.OrderBookDto;
 import com.turntabl.marketdata.dto.OrderFromExchange;
+import com.turntabl.marketdata.dto.OrderProcessObject;
+import com.turntabl.marketdata.dto.TickerWithOrders;
 import com.turntabl.marketdata.enums.Exchange;
 import com.turntabl.marketdata.enums.Side;
 import com.turntabl.marketdata.service.MarketDataHandlingService;
@@ -29,6 +32,16 @@ public class MarketDataHandlingServiceImpl implements MarketDataHandlingService 
 
         var sortByAskPriceDescending = sortByAskPriceDescending(orderBooks);
 
+//        var  dd = sortByAskPriceDescending.entrySet().stream()
+//                .map(x -> TickerWithOrders.builder()
+//                        .ticker(x.getKey())
+//                        .orders(x.getValue())
+//                        .build())
+//               .map(tickerWithOrders -> OrderProcessObject.builder()
+//                       .tickerWithOrders(tickerWithOrders)
+//                       .side(Side.SELL)
+//                       .build()).toList();
+
         var sortByBidPriceAscending = sortByBidPriceAscending(orderBooks);
 
         ordersGroupedBySide.put(Side.SELL, sortByAskPriceDescending);
@@ -36,12 +49,36 @@ public class MarketDataHandlingServiceImpl implements MarketDataHandlingService 
 
         return ordersGroupedBySide;
     }
+
+    private List<OrderProcessObject> transformIntoOrderProcess( Map<String, List<OrderBookDto>> sortedOrderBooks, Side side) {
+       return sortedOrderBooks.entrySet().stream()
+                .map(x -> TickerWithOrders.builder()
+                        .ticker(x.getKey())
+                        .orders(x.getValue())
+                        .build())
+                .map(tickerWithOrders -> OrderProcessObject.builder()
+                        .tickerWithOrders(tickerWithOrders)
+                        .side(side)
+                        .build()).toList();
+    }
     private Map<String, List<OrderBookDto>> sortByAskPriceDescending(List<OrderBookDto> orderBooks) {
+
         /***
          * Sort all orders belonging to a TICKER by ask price desc
          * i.e A seller would want to see the highest ask price  first
          ***/
-        return orderBooks.stream()
+        final ObjectMapper mapper = new ObjectMapper(); //
+
+        var orderBooksBy = orderBooks.stream()
+                .collect(Collectors.groupingBy(OrderBookDto::getTicker, Collectors.collectingAndThen(
+                        Collectors.toList(),
+                        list -> list.stream()
+                                .sorted(Comparator.comparingDouble(OrderBookDto::getAskPrice).reversed())
+                                .toList()
+                )));
+
+
+      return   orderBooks.stream()
                 .collect(Collectors.groupingBy(OrderBookDto::getTicker, Collectors.collectingAndThen(
                         Collectors.toList(),
                         list -> list.stream()
@@ -72,10 +109,13 @@ public class MarketDataHandlingServiceImpl implements MarketDataHandlingService 
     }
 
     private void sendOrderBooksToPublisher(Map<Side, Map<String, List<OrderBookDto>>> orders, Exchange exchange) {
-        var ordersFromExchange = OrderFromExchange.builder()
+       Map<Exchange, Map<Side, Map<String, List<OrderBookDto>>>> as = new HashMap<>();
+       as.put(exchange, orders);
+       redisMessagePublisher.publish2(as);
+       /* var ordersFromExchange = OrderFromExchange.builder()
                         .orders(orders)
                         .exchange(exchange)
                                 .build();
-       redisMessagePublisher.publish(ordersFromExchange);
+       redisMessagePublisher.publish(ordersFromExchange);*/
     }
 }

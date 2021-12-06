@@ -1,5 +1,6 @@
 package com.turntabl.marketdata.config;
 
+import com.turntabl.marketdata.dto.OrderFromExchange;
 import com.turntabl.marketdata.service.MessagePublisher;
 import com.turntabl.marketdata.service.impl.ChannelTwoMessageSubscriber;
 import com.turntabl.marketdata.service.impl.RedisMessagePublisher;
@@ -17,6 +18,8 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 
 import java.util.List;
 
@@ -46,6 +49,8 @@ public class RedisConfig {
         final RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(jedisConnectionFactory());
         template.setValueSerializer(new GenericToStringSerializer<>(Object.class));
+        template.setHashKeySerializer(new JdkSerializationRedisSerializer());
+        template.setKeySerializer(new JdkSerializationRedisSerializer());
         return template;
     }
 

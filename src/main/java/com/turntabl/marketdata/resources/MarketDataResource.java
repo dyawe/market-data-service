@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class MarketDataResource {
+    private final Jedis jedis;
     @Value("${market-data.variables.redis.topic}")
     private  String topic;
     private final MarketDataService marketDataService;
@@ -37,6 +39,7 @@ public class MarketDataResource {
     @PostMapping("/market-data")
     ResponseEntity<Object> getMarketData(@RequestBody ArrayList<OrderBookDto> orderBooks){
         log.info("order books: {}" ,orderBooks);
+        jedis.blpop("name");
         Exchange.ONE.name();
         return ResponseEntity.ok("success!!");
     }

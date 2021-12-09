@@ -1,12 +1,7 @@
 package com.turntabl.marketdata.config;
 
-import com.turntabl.marketdata.dto.OrderFromExchange;
-import com.turntabl.marketdata.service.MessagePublisher;
-import com.turntabl.marketdata.service.impl.ChannelTwoMessageSubscriber;
-import com.turntabl.marketdata.service.impl.RedisMessagePublisher;
 import com.turntabl.marketdata.service.impl.RedisMessageSubscriber;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +13,9 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisShardInfo;
 
 import java.util.List;
 
@@ -40,8 +36,15 @@ public class RedisConfig {
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(host, port);
-//        redisStandaloneConfiguration.setPassword(RedisPassword.of(password));
+        redisStandaloneConfiguration.setPassword(RedisPassword.of(password));
         return new JedisConnectionFactory(redisStandaloneConfiguration);
+    }
+
+    @Bean
+    Jedis jedis() {
+        JedisShardInfo shardInfo = new JedisShardInfo(host, port);
+        shardInfo.setPassword(password);
+        return new Jedis(shardInfo);
     }
 
     @Bean

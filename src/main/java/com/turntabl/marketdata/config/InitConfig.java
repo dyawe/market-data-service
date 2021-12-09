@@ -4,22 +4,25 @@ import com.turntabl.marketdata.exceptions.AlreadySubscribedException;
 import com.turntabl.marketdata.service.MarketDataService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
+import redis.clients.jedis.Jedis;
 
 @Configuration
 @Slf4j
 @RequiredArgsConstructor
 public class InitConfig {
     private final MarketDataService marketDataService;
-
+    private final Jedis jedis;
     /**
      * Runs when the application starts and attempts subscribing to the exchange data
      * @exception  AlreadySubscribedException when subscription has already occurred
      */
     @EventListener(ApplicationReadyEvent.class)
     public void initSubscriptions() {
+        jedis.rpush("name", "mickey ios sss");
         log.info("Initializing app! please wait.......");
         try {
             marketDataService.subscribe();

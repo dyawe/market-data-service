@@ -15,14 +15,13 @@ import redis.clients.jedis.Jedis;
 @RequiredArgsConstructor
 public class InitConfig {
     private final MarketDataService marketDataService;
-    private final Jedis jedis;
+
     /**
      * Runs when the application starts and attempts subscribing to the exchange data
      * @exception  AlreadySubscribedException when subscription has already occurred
      */
     @EventListener(ApplicationReadyEvent.class)
     public void initSubscriptions() {
-        jedis.rpush("name", "mickey ios sss");
         log.info("Initializing app! please wait.......");
         try {
             marketDataService.subscribe();

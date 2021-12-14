@@ -36,16 +36,16 @@ public class RedisConfig {
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(host, port);
-        redisStandaloneConfiguration.setPassword(RedisPassword.of(password));
+     //   redisStandaloneConfiguration.setPassword(RedisPassword.of(password));
         return new JedisConnectionFactory(redisStandaloneConfiguration);
     }
 
-    @Bean
-    Jedis jedis() {
-        JedisShardInfo shardInfo = new JedisShardInfo(host, port);
-        shardInfo.setPassword(password);
-        return new Jedis(shardInfo);
-    }
+//    @Bean
+//    Jedis jedis() {
+//        JedisShardInfo shardInfo = new JedisShardInfo(host, port);
+//        shardInfo.setPassword(password);
+//        return new Jedis(shardInfo);
+//    }
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate() {

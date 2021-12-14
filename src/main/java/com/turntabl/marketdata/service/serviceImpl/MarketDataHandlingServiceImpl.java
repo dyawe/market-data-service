@@ -25,6 +25,9 @@ public class MarketDataHandlingServiceImpl implements MarketDataHandlingService 
     @Autowired
     RedisMessagePublisher redisMessagePublisher;
 
+    @Autowired
+    EmitterServiceImpl emitterService;
+
     @Override
     public Map<Side, Map<String, List<OrderBookDto>>> transformData(List<OrderBookDto> orderBooks) {
 
@@ -104,8 +107,10 @@ public class MarketDataHandlingServiceImpl implements MarketDataHandlingService 
 
     @Override
     public void receiveOrderBooks(List<OrderBookDto> orderBooks, Exchange type) {
-      var ordersToPublish =  transformData(orderBooks);
-      sendOrderBooksToPublisher(ordersToPublish, type);
+        emitterService.initPublishEvent(orderBooks);
+        var ordersToPublish =  transformData(orderBooks);
+        sendOrderBooksToPublisher(ordersToPublish, type);
+
     }
 
     private void sendOrderBooksToPublisher(Map<Side, Map<String, List<OrderBookDto>>> orders, Exchange exchange) {

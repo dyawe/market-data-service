@@ -6,7 +6,10 @@ market-data:
     exchange-url:
       one: https://exchange.matraining.com/md
       two: https://exchange2.matraining.com/md
-    callback: "${market-data.variables.urls.market-data}/api/v1/callback/webhook"
+#    callback: "${market-data.variables.urls.market-data}/api/v1/callback/webhook"
+    callback:  https://1cef-102-22-11-130.ngrok.io/api/v1/callback/webhook
+
+
     callback-ex2: "${market-data.variables.urls.market-data}/api/v1/callback/webhook"
     redis:
       topic: "pubsub:market-data"

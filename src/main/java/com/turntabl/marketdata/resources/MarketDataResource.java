@@ -28,7 +28,6 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class MarketDataResource {
-    private final Jedis jedis;
     @Value("${market-data.variables.redis.topic}")
     private  String topic;
     private final MarketDataService marketDataService;
@@ -36,20 +35,20 @@ public class MarketDataResource {
     private final RedisMessagePublisher redisMessagePublisher;
 
 
-    @PostMapping("/market-data")
-    ResponseEntity<Object> getMarketData(@RequestBody ArrayList<OrderBookDto> orderBooks){
-        log.info("order books: {}" ,orderBooks);
-        jedis.blpop("name");
-        Exchange.ONE.name();
-        return ResponseEntity.ok("success!!");
-    }
+//    @PostMapping("/market-data")
+//    ResponseEntity<Object> getMarketData(@RequestBody ArrayList<OrderBookDto> orderBooks){
+//        log.info("order books: {}" ,orderBooks);
+//        jedis.blpop("name");
+//        Exchange.ONE.name();
+//        return ResponseEntity.ok("success!!");
+//    }
     /**
      * @apiNote Receives a list of orderbooks from exchange one and transforms it before publishing
      * @param orderBooks  A list of orderbooks broadcasted from exchange one
      * @return Success message
      */
     @PostMapping("/callback/webhook" )
-    ResponseEntity<?> onMarketDataSubscribe(@RequestBody List<OrderBookDto> orderBooks){
+    ResponseEntity<?> onMarketDataSubscribe(@RequestBody List<OrderBookDto> orderBooks) {
         log.info("Order books coming from exchange one ===>{}" ,orderBooks);
         marketDataHandlingService.receiveOrderBooks(orderBooks, Exchange.ONE);
         return ResponseEntity.ok("success!!");
